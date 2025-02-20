@@ -1,0 +1,29 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+spec:
+  image: dockerhub.vertexwan.cn/pub/opentelemetry-collector-contrib:0.119.0
+  serviceAccount: harbor-account
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    exporters:
+      jaeger:
+        endpoint: "jaeger:14250"
+        tls:
+          insecure: true
+
+    processors:
+      batch:
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [jaeger]

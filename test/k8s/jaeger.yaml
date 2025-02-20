@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+    spec:
+      imagePullSecrets:
+        - name: harbor
+      containers:
+        - name: jaeger
+          image: dockerhub.vertexwan.cn/pub/jaeger-all-in-one:1.6.0
+          ports:
+            - containerPort: 16686 # UI
+            - containerPort: 14268 # Collector HTTP
+            - containerPort: 14250 # Collector gRPC
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger
+spec:
+  type: NodePort
+  ports:
+    - name: ui
+      protocol: TCP
+      port: 16686
+      targetPort: 16686
+    - name: collector-http
+      protocol: TCP
+      port: 14268
+      targetPort: 14268
+    - name: collector-grpc
+      protocol: TCP
+      port: 14250
+      targetPort: 14250
+    - name: otel-grpc
+      protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - name: otel-http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318
+  selector:
+    app: jaeger
